@@ -13,7 +13,6 @@ type svgRender struct {
 }
 
 func RenderSVG(f io.Writer, size int) {
-	//headPlayerX := tictac.NewDefaultState(tictac.PlayerX)
 	headPlayerX := NewState(3, PlayerX)
 	headPlayerX.FindAllChildStates()
 
@@ -30,18 +29,45 @@ func RenderSVG(f io.Writer, size int) {
 		f:         f,
 	}
 
-	fmt.Fprintf(f, `<svg viewBox="0 0 1 1" width="%v" height="%v">`, size, size)
+	fmt.Fprintf(f, `<svg viewBox="0 0 1 2" width="%v" height="%v">`, size, 2*size)
 	defer fmt.Fprint(f, `</svg>`)
-
 	fmt.Fprint(f, `<g stroke-width="0.05" stroke-linecap="round" stroke="rgb(0,0,0)">`)
 	defer fmt.Fprint(f, `</g>`)
-
 	// rectangle to be background
-	fmt.Fprint(f, `<rect width="1" height="1" style="fill:rgb(255,255,255);stroke:rgb(255,255,255)"/>`)
+	fmt.Fprint(f, `<rect width="1" height="9" style="fill:rgb(255,255,255);stroke:rgb(255,255,255)"/>`)
 
+	// dirty layout sized by constants follows
+	fmt.Fprint(f, `
+<g transform="scale(0.001)">
+	<text x="5" y="40" font-size="30">
+		Complete Map of Optimal Tic-Tac-Toe
+	</text>
+	<text x="5" y="80" font-size="20">
+		Your move is given by the position of the largest red symbol
+		on the grid. When your opponents picks a move, zoom in
+	</text>
+	<text x="5" y="100" font-size="20">
+		on the region of the grid where they went. Repeat
+	</text>
+	<text x="5" y="130" font-size="20">
+	Map for X:
+	</text>
+</g>`)
+
+	fmt.Fprint(f, `<g transform="translate(0 0.150) scale(0.9) translate(0.05 -0.025)" >`)
+	render.renderState(&headPlayerX)
+	fmt.Fprint(f, `</g>`)
+
+	fmt.Fprint(f,`
+<g transform="translate(0 1.06) scale(0.001)">
+	<text x="5" y="0" font-size="20">
+	Map for O:
+	</text>
+</g>
+	`)
+	fmt.Fprint(f, `<g transform="translate(0 1.090) scale(0.9) translate(0.05 -0.025)" >`)
 	render.renderState(&headPlayerO)
-	//render.renderState(&headPlayerX)
-
+	fmt.Fprint(f, `</g>`)
 }
 
 func (r *svgRender) beginTranslation(pos Pos) {
@@ -58,7 +84,7 @@ func (r *svgRender) endTranslation() {
 }
 
 func (r *svgRender) renderState(s *StateTreeNode) {
-	if  p := s.Board.CheckWin(); p != NoPlayer && p != s.OurPlayer {
+	if p := s.Board.CheckWin(); p != NoPlayer && p != s.OurPlayer {
 		// draw opponent's win
 		r.drawBars(&s.Board)
 		for _, pos := range s.Board.AllPositions() {
@@ -200,6 +226,7 @@ func (r *svgRender) drawWinDiagonal1() {
 	fmt.Fprintf(r.f, `<line x1="0" x2="1" y1="0" y2="1" style="stroke:rgb(255,0,0);stroke-width:%v" />`,
 		2*r.barWidth)
 }
+
 func (r *svgRender) drawWinDiagonal2() {
 	fmt.Fprintf(r.f, `<line x1="1" x2="0" y1="0" y2="1" style="stroke:rgb(255,0,0);stroke-width:%v" />`,
 		2*r.barWidth)

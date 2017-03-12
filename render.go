@@ -39,17 +39,19 @@ func RenderSVG(f io.Writer, size int) {
 	// dirty layout sized by constants follows
 	fmt.Fprint(f, `
 <g transform="scale(0.001)">
-	<text x="5" y="40" font-size="30">
+	<text x="500" y="40" font-size="30" style="font-family: monospace" text-anchor="middle">
 		Complete Map of Optimal Tic-Tac-Toe
 	</text>
-	<text x="5" y="80" font-size="20">
-		Your move is given by the position of the largest red symbol
-		on the grid. When your opponents picks a move, zoom in
+	<text x="5" y="80" font-size="20" style="font-family: monospace">
+		Your move is given by the position of the largest red symbol on the grid. When
 	</text>
-	<text x="5" y="100" font-size="20">
-		on the region of the grid where they went. Repeat
+	<text x="5" y="100" font-size="20" style="font-family: monospace">
+		your opponents picks a move, zoom in on the region of the grid where they went.
 	</text>
-	<text x="5" y="130" font-size="20">
+	<text x="5" y="120" font-size="20" style="font-family: monospace">
+	Repeat
+	</text>
+	<text x="500" y="130" font-size="30" style="font-family: monospace" text-anchor="middle">
 	Map for X:
 	</text>
 </g>`)
@@ -58,9 +60,9 @@ func RenderSVG(f io.Writer, size int) {
 	render.renderState(&headPlayerX)
 	fmt.Fprint(f, `</g>`)
 
-	fmt.Fprint(f,`
+	fmt.Fprint(f, `
 <g transform="translate(0 1.06) scale(0.001)">
-	<text x="5" y="0" font-size="20">
+	<text x="500" y="0" font-size="30" text-anchor="middle">
 	Map for O:
 	</text>
 </g>

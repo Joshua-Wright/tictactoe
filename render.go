@@ -27,8 +27,8 @@ func RenderSVG(f io.Writer, size int) {
 		f:         f,
 	}
 
-	fmt.Fprintf(f, "<svg viewBox=\"0 0 1 1\" width=\"%v\" height=\"%v\">\n", size, size)
-	defer fmt.Fprint(f, "</svg>\n")
+	fmt.Fprintf(f, `<svg viewBox="0 0 1 1" width="%v" height="%v">`, size, size)
+	defer fmt.Fprint(f, `</svg>`)
 
 	fmt.Fprint(f, `<g stroke-width="0.05" stroke-linecap="round" stroke="rgb(0,0,0)">`)
 	defer fmt.Fprint(f, `</g>`)
@@ -39,18 +39,17 @@ func RenderSVG(f io.Writer, size int) {
 
 }
 
-
 func (r *svgRender) beginTranslation(pos Pos) {
 
 	dx := float64(pos.X) * (r.cellWidth + r.barWidth)
 	dy := float64(pos.Y) * (r.cellWidth + r.barWidth)
 	scale := r.cellWidth
-	fmt.Fprintf(r.f, "<g transform=\"translate(%v %v) scale(%v) translate(%v %v) scale(%v)\">\n",
+	fmt.Fprintf(r.f, `<g transform="translate(%v %v) scale(%v) translate(%v %v) scale(%v)">`,
 		dx, dy, scale, (1-r.buffer)/2, (1-r.buffer)/2, r.buffer)
 }
 
 func (r *svgRender) endTranslation() {
-	fmt.Fprint(r.f, "</g>")
+	fmt.Fprint(r.f, `</g>`)
 }
 
 func (r *svgRender) renderState(s *StateTreeNode) {
@@ -113,8 +112,8 @@ func (r *svgRender) drawBars(b *BoardState) {
 	Y2--|---|---
 		|	|
 	*/
-	fmt.Fprint(r.f, "<g>\n")
-	defer fmt.Fprint(r.f, "</g>\n")
+	fmt.Fprint(r.f, `<g>`)
+	defer fmt.Fprint(r.f, `</g>`)
 
 	for row := 1; row < b.Size(); row++ {
 		row := float64(row)
@@ -144,22 +143,22 @@ func (r *svgRender) drawO() {
 
 func (r *svgRender) drawRowWin(row int) {
 	y := float64(row)*(r.cellWidth+r.barWidth) + r.cellWidth/2
-	fmt.Fprintf(r.f, "<line x1=\"%v\" x2=\"%v\" y1=\"0\" y2=\"1\" style=\"stroke:rgb(255,0,0);stroke-width:%v\" />",
+	fmt.Fprintf(r.f, `<line x1="%v" x2="%v" y1="0" y2="1" style="stroke:rgb(255,0,0);stroke-width:%v" />`,
 		y, y, 2*r.barWidth)
 }
 
 func (r *svgRender) drawColumnWin(row int) {
 	y := float64(row)*(r.cellWidth+r.barWidth) + r.cellWidth/2
-	fmt.Fprintf(r.f, "<line x1=\"0\" x2=\"1\" y1=\"%v\" y2=\"%v\" style=\"stroke:rgb(255,0,0);stroke-width:%v\" />",
+	fmt.Fprintf(r.f, `<line x1="0" x2="1" y1="%v" y2="%v" style="stroke:rgb(255,0,0);stroke-width:%v" />`,
 		y, y, 2*r.barWidth)
 }
 
 func (r *svgRender) drawWinDiagonal1() {
-	fmt.Fprintf(r.f, "<line x1=\"0\" x2=\"1\" y1=\"0\" y2=\"1\" style=\"stroke:rgb(255,0,0);stroke-width:%v\" />",
+	fmt.Fprintf(r.f, `<line x1="0" x2="1" y1="0" y2="1" style="stroke:rgb(255,0,0);stroke-width:%v" />`,
 		2*r.barWidth)
 }
 func (r *svgRender) drawWinDiagonal2() {
-	fmt.Fprintf(r.f, "<line x1=\"1\" x2=\"0\" y1=\"0\" y2=\"1\" style=\"stroke:rgb(255,0,0);stroke-width:%v\" />",
+	fmt.Fprintf(r.f, `<line x1="1" x2="0" y1="0" y2="1" style="stroke:rgb(255,0,0);stroke-width:%v" />`,
 		2*r.barWidth)
 }
 

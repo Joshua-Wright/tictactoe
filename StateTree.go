@@ -33,6 +33,7 @@ func NewState(size int, us Player) StateTreeNode {
 
 func (s *StateTreeNode) FindAllChildStates() {
 	if (s.Board.Full()) {
+		s.Fitness = 0
 		return
 	}
 	if p := s.Board.CheckWin(); p != NoPlayer {
@@ -62,8 +63,8 @@ func (s *StateTreeNode) FindAllChildStates() {
 		// we are playing next, so do max of children
 		s.Fitness = math.MinInt32
 		for i, child := range s.Children {
-			if s.Fitness < child.Fitness-1 {
-				s.Fitness = child.Fitness - 1
+			if s.Fitness < child.Fitness {
+				s.Fitness = child.Fitness
 				s.BestChild = i
 			}
 		}
@@ -71,8 +72,8 @@ func (s *StateTreeNode) FindAllChildStates() {
 		// other player playing, minimize children
 		s.Fitness = math.MaxInt32
 		for i, child := range s.Children {
-			if s.Fitness > child.Fitness+1 {
-				s.Fitness = child.Fitness + 1
+			if s.Fitness > child.Fitness {
+				s.Fitness = child.Fitness
 				s.BestChild = i
 			}
 		}

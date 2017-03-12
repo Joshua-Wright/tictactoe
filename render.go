@@ -58,13 +58,39 @@ func (r *svgRender) endTranslation() {
 }
 
 func (r *svgRender) renderState(s *StateTreeNode) {
-	if p := s.Board.CheckWin(); p != NoPlayer && p != s.OurPlayer {
+	if  p := s.Board.CheckWin(); p != NoPlayer && p != s.OurPlayer {
+		// draw opponent's win
+		r.drawBars(&s.Board)
+		for _, pos := range s.Board.AllPositions() {
+			r.beginTranslation(pos)
+			switch s.Board.GetPos(pos) {
+			case PlayerX:
+				r.drawX()
+			case PlayerO:
+				r.drawO()
+			}
+			r.endTranslation()
+		}
+		r.drawWins(s.Board)
+		// don't draw any more stuff after a win
 		return
 	} else if p == s.OurPlayer {
 		r.drawWins(s.Board)
 		return
 	}
 	if (s.Board.Full()) {
+		// draw board which is full
+		r.drawBars(&s.Board)
+		for _, pos := range s.Board.AllPositions() {
+			r.beginTranslation(pos)
+			switch s.Board.GetPos(pos) {
+			case PlayerX:
+				r.drawX()
+			case PlayerO:
+				r.drawO()
+			}
+			r.endTranslation()
+		}
 		return
 	}
 
@@ -74,7 +100,7 @@ func (r *svgRender) renderState(s *StateTreeNode) {
 	for _, pos := range s.Board.OccupiedCells() {
 		r.beginTranslation(pos)
 		// print an X
-		if (s.Board.GetPos(pos) == PlayerX) {
+		if s.Board.GetPos(pos) == PlayerX {
 			r.drawX()
 		} else {
 			r.drawO()

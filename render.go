@@ -34,7 +34,7 @@ func RenderSVG(f io.Writer, size int) {
 	fmt.Fprint(f, `<g stroke-width="0.05" stroke-linecap="round" stroke="rgb(0,0,0)">`)
 	defer fmt.Fprint(f, `</g>`)
 	// rectangle to be background
-	fmt.Fprint(f, `<rect width="1" height="9" style="fill:rgb(255,255,255);stroke:rgb(255,255,255)"/>`)
+	fmt.Fprint(f, `<rect width="1" height="2" style="fill:rgb(255,255,255);stroke:rgb(255,255,255)"/>`)
 
 	// dirty layout sized by constants follows
 	fmt.Fprint(f, `

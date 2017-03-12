@@ -21,6 +21,16 @@ func NewDefaultState(us Player) StateTreeNode {
 	}
 }
 
+func NewState(size int, us Player) StateTreeNode {
+	return StateTreeNode{
+		Board:      NewBoard(size),
+		Children:   []StateTreeNode{},
+		NextPlayer: PlayerX,
+		Fitness:    0,
+		OurPlayer:  us,
+	}
+}
+
 func (s *StateTreeNode) FindAllChildStates() {
 	if (s.Board.Full()) {
 		return

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 	"io"
-	"text/template"
 )
 
 func main() {
-	head := tictac.NewDefaultState(tictac.PlayerX)
+	//head := tictac.NewDefaultState(tictac.PlayerX)
+	head := tictac.NewState(3, tictac.PlayerX)
 	head.FindAllChildStates()
 
 	f, err := os.OpenFile("out.svg", os.O_CREATE|os.O_RDWR, 0666)
@@ -18,7 +18,7 @@ func main() {
 	}
 	defer f.Close()
 
-	const S int = 4096
+	const S int = 8000
 
 	fmt.Fprintf(f, "<svg viewBox=\"0 0 1 1\" width=\"%v\" height=\"%v\">\n", S, S)
 	fmt.Fprint(f, `<g stroke-width="0.05" stroke-linecap="round" stroke="rgb(0,0,0)">`)
@@ -46,13 +46,14 @@ func translation(pos tictac.Pos) string {
 
 func renderState(f io.Writer, s *tictac.StateTreeNode) {
 	if p := s.Board.CheckWin(); p != tictac.NoPlayer {
+		drawWins(f, s.Board)
 		return
 	}
 	if (s.Board.Full()) {
 		return
 	}
 
-	drawBars(f)
+	drawBars(f, &s.Board)
 
 	// draw squares that are not occupied
 	for _, pos := range s.Board.OccupiedCells() {
@@ -67,15 +68,21 @@ func renderState(f io.Writer, s *tictac.StateTreeNode) {
 	}
 
 	if (s.OurPlayer == s.NextPlayer) {
-		// draw our thing, then go again
+		// draw our turn, then go again
 		child := s.Children[s.BestChild]
 		pos := tictac.BoardDiff(s.Board, child.Board)
+
+		// print our X move in red
 		fmt.Fprint(f, translation(pos))
-		// print an X
 		drawRedX(f)
 		fmt.Fprint(f, "</g>\n")
 
 		s = &child
+	}
+
+	if p := s.Board.CheckWin(); p != tictac.NoPlayer {
+		drawWins(f, s.Board)
+		return
 	}
 
 	// draw each child inside the cell it represents
@@ -87,7 +94,7 @@ func renderState(f io.Writer, s *tictac.StateTreeNode) {
 	}
 }
 
-func drawBars(f io.Writer) {
+func drawBars(f io.Writer, b *tictac.BoardState) {
 	/*
 	format:
 		X1	X2
@@ -100,27 +107,15 @@ func drawBars(f io.Writer) {
 	fmt.Fprint(f, "<g>\n")
 	defer fmt.Fprint(f, "</g>\n")
 
-	t, err := template.New("BoardTemplate").Parse(`
-	<line x1="0" x2="1" y1="{{.Y1}}" y2="{{.Y1}}" style="stroke:rgb(0,0,0);stroke-width:{{.BarWidth}}" />
-	<line x1="0" x2="1" y1="{{.Y2}}" y2="{{.Y2}}" style="stroke:rgb(0,0,0);stroke-width:{{.BarWidth}}" />
-	<line x1="{{.X1}}" x2="{{.X1}}" y1="0" y2="1" style="stroke:rgb(0,0,0);stroke-width:{{.BarWidth}}" />
-	<line x1="{{.X2}}" x2="{{.X2}}" y1="0" y2="1" style="stroke:rgb(0,0,0);stroke-width:{{.BarWidth}}" />
-	`)
-	if err != nil {
-		panic(err)
+	for row := 1; row < b.Size(); row++ {
+		row := float64(row)
+		y := row*cellWidth + barWidth/2
+		if row > 1 {
+			y += barWidth * (row - 1)
+		}
+		fmt.Fprintf(f, `<line x1="0" x2="1" y1="%v" y2="%v" style="stroke:rgb(0,0,0);stroke-width:%v" />`, y, y, barWidth)
+		fmt.Fprintf(f, `<line x1="%v" x2="%v" y1="0" y2="1" style="stroke:rgb(0,0,0);stroke-width:%v" />`, y, y, barWidth)
 	}
-	type BoardGrid struct {
-		X1, X2, Y1, Y2 float64
-		BarWidth       float64
-	}
-	bg := BoardGrid{
-		X1:       cellWidth + barWidth/2,
-		X2:       2*cellWidth + barWidth + barWidth/2,
-		Y1:       cellWidth + barWidth/2,
-		Y2:       2*cellWidth + barWidth + barWidth/2,
-		BarWidth: barWidth,
-	}
-	t.Execute(f, bg)
 }
 
 func drawX(f io.Writer) {
@@ -136,4 +131,45 @@ func drawRedX(f io.Writer) {
 
 func drawO(f io.Writer) {
 	fmt.Fprint(f, `<circle cx="0.5" cy="0.5" r="0.45" stroke="black" fill="none" />`)
+}
+
+func drawRowWin(f io.Writer, row int) {
+	y := float64(row)*(cellWidth+barWidth) + cellWidth/2
+	fmt.Fprintf(f, "<line x1=\"%v\" x2=\"%v\" y1=\"0\" y2=\"1\" style=\"stroke:rgb(255,0,0);stroke-width:%v\" />",
+		y, y, 2*barWidth)
+}
+
+func drawColumnWin(f io.Writer, row int) {
+	y := float64(row)*(cellWidth+barWidth) + cellWidth/2
+	fmt.Fprintf(f, "<line x1=\"0\" x2=\"1\" y1=\"%v\" y2=\"%v\" style=\"stroke:rgb(255,0,0);stroke-width:%v\" />",
+		y, y, 2*barWidth)
+}
+
+func drawWinDiagonal1(f io.Writer) {
+	fmt.Fprintf(f, "<line x1=\"0\" x2=\"1\" y1=\"0\" y2=\"1\" style=\"stroke:rgb(255,0,0);stroke-width:%v\" />",
+		2*barWidth)
+}
+func drawWinDiagonal2(f io.Writer) {
+	fmt.Fprintf(f, "<line x1=\"1\" x2=\"0\" y1=\"0\" y2=\"1\" style=\"stroke:rgb(255,0,0);stroke-width:%v\" />",
+		2*barWidth)
+}
+
+func drawWins(f io.Writer, b tictac.BoardState) {
+	// check all rows and columns
+	for i := 0; i < b.Size(); i++ {
+		if b.CheckRow(i) != tictac.NoPlayer {
+			drawRowWin(f, i)
+		}
+		if b.CheckColumn(i) != tictac.NoPlayer {
+			drawColumnWin(f, i)
+		}
+	}
+	// check diagonals
+	if b.CheckDiagonal1() != tictac.NoPlayer {
+		drawWinDiagonal1(f)
+	}
+
+	if b.CheckDiagonal2() != tictac.NoPlayer {
+		drawWinDiagonal2(f)
+	}
 }

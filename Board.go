@@ -100,20 +100,20 @@ func (b *BoardState) Full() bool {
 func (b *BoardState) CheckWin() Player {
 	// here we use that board square assumption, because we only check the two main diagonals
 
-	if p := b.checkDiagonal1(); p != NoPlayer {
+	if p := b.CheckDiagonal1(); p != NoPlayer {
 		return p
 	}
-	if p := b.checkDiagonal2(); p != NoPlayer {
+	if p := b.CheckDiagonal2(); p != NoPlayer {
 		return p
 	}
 
 	for i := 0; i < b.Size(); i++ {
 
-		if p := b.checkX(i); p != NoPlayer {
+		if p := b.CheckRow(i); p != NoPlayer {
 			return p
 		}
 
-		if p := b.checkY(i); p != NoPlayer {
+		if p := b.CheckColumn(i); p != NoPlayer {
 			return p
 		}
 
@@ -121,7 +121,7 @@ func (b *BoardState) CheckWin() Player {
 	return NoPlayer
 }
 
-func (b *BoardState) checkX(x int) Player {
+func (b *BoardState) CheckRow(x int) Player {
 	last := b.board[x][0]
 	for _, cell := range b.board[x] {
 		if cell != last {
@@ -133,7 +133,7 @@ func (b *BoardState) checkX(x int) Player {
 	return last
 }
 
-func (b *BoardState) checkY(y int) Player {
+func (b *BoardState) CheckColumn(y int) Player {
 	last := b.board[0][y]
 	for _, row := range b.board {
 		cell := row[y]
@@ -146,7 +146,7 @@ func (b *BoardState) checkY(y int) Player {
 	return last
 }
 
-func (b *BoardState) checkDiagonal1() Player {
+func (b *BoardState) CheckDiagonal1() Player {
 	last := b.board[0][0]
 	for i := range b.board {
 		if b.board[i][i] != last {
@@ -158,7 +158,7 @@ func (b *BoardState) checkDiagonal1() Player {
 	return last
 }
 
-func (b *BoardState) checkDiagonal2() Player {
+func (b *BoardState) CheckDiagonal2() Player {
 	n := b.Size()
 	last := b.board[n-1][0]
 	for i := range b.board {

@@ -16,7 +16,7 @@ func main() {
 	}
 	defer f.Close()
 
-	const S int = 8000
+	const S int = 16000
 
 	tictac.RenderSVG(f, S)
 }

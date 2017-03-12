@@ -13,9 +13,12 @@ type svgRender struct {
 }
 
 func RenderSVG(f io.Writer, size int) {
-	//head := tictac.NewDefaultState(tictac.PlayerX)
-	head := NewState(3, PlayerX)
-	head.FindAllChildStates()
+	//headPlayerX := tictac.NewDefaultState(tictac.PlayerX)
+	headPlayerX := NewState(3, PlayerX)
+	headPlayerX.FindAllChildStates()
+
+	headPlayerO := NewState(3, PlayerO)
+	headPlayerO.FindAllChildStates()
 
 	barWidth := 0.01
 	buffer := 0.98
@@ -33,9 +36,11 @@ func RenderSVG(f io.Writer, size int) {
 	fmt.Fprint(f, `<g stroke-width="0.05" stroke-linecap="round" stroke="rgb(0,0,0)">`)
 	defer fmt.Fprint(f, `</g>`)
 
+	// rectangle to be background
 	fmt.Fprint(f, `<rect width="1" height="1" style="fill:rgb(255,255,255);stroke:rgb(255,255,255)"/>`)
 
-	render.renderState(&head)
+	render.renderState(&headPlayerO)
+	//render.renderState(&headPlayerX)
 
 }
 
@@ -53,7 +58,9 @@ func (r *svgRender) endTranslation() {
 }
 
 func (r *svgRender) renderState(s *StateTreeNode) {
-	if p := s.Board.CheckWin(); p != NoPlayer {
+	if p := s.Board.CheckWin(); p != NoPlayer && p != s.OurPlayer {
+		return
+	} else if p == s.OurPlayer {
 		r.drawWins(s.Board)
 		return
 	}
@@ -82,7 +89,11 @@ func (r *svgRender) renderState(s *StateTreeNode) {
 
 		// print our X move in red
 		r.beginTranslation(pos)
-		r.drawRedX()
+		if (s.OurPlayer == PlayerX) {
+			r.drawRedX()
+		} else {
+			r.drawRedO()
+		}
 		r.endTranslation()
 
 		s = &child
@@ -138,7 +149,13 @@ func (r *svgRender) drawRedX() {
 }
 
 func (r *svgRender) drawO() {
-	fmt.Fprint(r.f, `<circle cx="0.5" cy="0.5" r="0.45" stroke="black" fill="none" />`)
+	fmt.Fprint(r.f, `<circle cx="0.5" cy="0.5" r="0.45" fill="none" />`)
+}
+
+func (r *svgRender) drawRedO() {
+	fmt.Fprint(r.f, `<g stroke="rgb(255,0,0)">`)
+	r.drawO()
+	fmt.Fprint(r.f, `</g>`)
 }
 
 func (r *svgRender) drawRowWin(row int) {

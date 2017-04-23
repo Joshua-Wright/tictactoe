@@ -1,4 +1,4 @@
-#Tic Tac Toe
+# Tic Tac Toe
 
 This is a re-creation of https://xkcd.com/832/ using golang and svg.
 
